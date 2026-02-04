@@ -1,8 +1,9 @@
 {
   "name": "nostr-inbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Unified Nostr notification stream for AI agents — mentions, DMs, DVM requests, zaps, WoT attestations in one event loop",
   "main": "src/index.cjs",
+  "types": "src/index.d.cts",
   "bin": {
     "nostr-inbox": "src/cli.cjs"
   },

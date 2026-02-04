@@ -85,25 +85,61 @@ function buildFilters(pubkey, channels = {}, since = null) {
   }
 
   // DVM requests: kind 5xxx tagged to us (we're a DVM provider)
+  // Split into small batches to avoid overwhelming relays
   if (dvmRequests) {
-    const dvmRequestKinds = [];
-    for (let k = 5000; k < 5100; k++) dvmRequestKinds.push(k);
-    filters.push({
-      kinds: dvmRequestKinds,
-      '#p': [pubkey],
-      ...sinceObj
-    });
+    const dvmKinds = channels.dvmKinds; // optional: specific DVM kinds to watch
+    if (dvmKinds && Array.isArray(dvmKinds)) {
+      // User specified exact kinds — use them directly
+      filters.push({
+        kinds: dvmKinds,
+        '#p': [pubkey],
+        ...sinceObj
+      });
+    } else {
+      // Common DVM kinds in small batches (max 20 per filter)
+      const commonDvmKinds = [
+        5000, 5001, 5002, 5003, 5004, 5005,  // generic
+        5050,                                   // text generation
+        5100,                                   // image generation
+        5200,                                   // text-to-speech
+        5250,                                   // speech-to-text
+        5300,                                   // content discovery
+        5301, 5302,                             // search, recommendations
+        5400, 5401,                             // data processing
+        5500, 5501,                             // translation
+        5900, 5901, 5902, 5903, 5904, 5905     // custom range
+      ];
+      filters.push({
+        kinds: commonDvmKinds,
+        '#p': [pubkey],
+        ...sinceObj
+      });
+    }
   }
 
   // DVM results: kind 6xxx tagged to us (we requested something)
   if (dvmResults) {
-    const dvmResultKinds = [];
-    for (let k = 6000; k < 6100; k++) dvmResultKinds.push(k);
-    filters.push({
-      kinds: dvmResultKinds,
-      '#p': [pubkey],
-      ...sinceObj
-    });
+    const dvmKinds = channels.dvmKinds;
+    if (dvmKinds && Array.isArray(dvmKinds)) {
+      // Map request kinds to result kinds
+      filters.push({
+        kinds: dvmKinds.map(k => k + 1000),
+        '#p': [pubkey],
+        ...sinceObj
+      });
+    } else {
+      const commonResultKinds = [
+        6000, 6001, 6002, 6003, 6004, 6005,
+        6050, 6100, 6200, 6250, 6300, 6301, 6302,
+        6400, 6401, 6500, 6501,
+        6900, 6901, 6902, 6903, 6904, 6905
+      ];
+      filters.push({
+        kinds: commonResultKinds,
+        '#p': [pubkey],
+        ...sinceObj
+      });
+    }
   }
 
   // Zaps: receipts tagged to our pubkey

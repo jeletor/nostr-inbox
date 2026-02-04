@@ -62,7 +62,7 @@ describe('buildFilters', () => {
     assert.equal(filters[0].since, since);
   });
 
-  it('includes DVM request kinds 5000-5099', () => {
+  it('includes common DVM request kinds (not 100 kinds)', () => {
     const filters = buildFilters(TEST_PUBKEY, {
       mentions: false, dms: false, dvmRequests: true, dvmResults: false,
       zaps: false, reactions: false, trust: false, marketplace: false
@@ -70,10 +70,10 @@ describe('buildFilters', () => {
     assert.equal(filters.length, 1);
     assert.ok(filters[0].kinds.includes(5000));
     assert.ok(filters[0].kinds.includes(5050));
-    assert.ok(filters[0].kinds.includes(5099));
+    assert.ok(filters[0].kinds.length < 30, 'should not generate 100 kinds');
   });
 
-  it('includes DVM result kinds 6000-6099', () => {
+  it('includes common DVM result kinds', () => {
     const filters = buildFilters(TEST_PUBKEY, {
       mentions: false, dms: false, dvmRequests: false, dvmResults: true,
       zaps: false, reactions: false, trust: false, marketplace: false
@@ -81,6 +81,18 @@ describe('buildFilters', () => {
     assert.equal(filters.length, 1);
     assert.ok(filters[0].kinds.includes(6000));
     assert.ok(filters[0].kinds.includes(6050));
+    assert.ok(filters[0].kinds.length < 30);
+  });
+
+  it('accepts custom DVM kinds', () => {
+    const filters = buildFilters(TEST_PUBKEY, {
+      mentions: false, dms: false, dvmRequests: true, dvmResults: true,
+      zaps: false, reactions: false, trust: false, marketplace: false,
+      dvmKinds: [5050, 5100]
+    });
+    assert.equal(filters.length, 2);
+    assert.deepEqual(filters[0].kinds, [5050, 5100]);
+    assert.deepEqual(filters[1].kinds, [6050, 6100]);
   });
 
   it('includes marketplace kinds', () => {
