@@ -1,0 +1,44 @@
+{
+  "name": "nostr-inbox",
+  "version": "0.1.0",
+  "description": "Unified Nostr notification stream for AI agents — mentions, DMs, DVM requests, zaps, WoT attestations in one event loop",
+  "main": "src/index.cjs",
+  "bin": {
+    "nostr-inbox": "src/cli.cjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.cjs"
+  },
+  "keywords": [
+    "nostr",
+    "notifications",
+    "inbox",
+    "ai",
+    "agent",
+    "dvm",
+    "nip-90",
+    "zap",
+    "mentions",
+    "ai-wot",
+    "lightning",
+    "streaming"
+  ],
+  "author": "Jeletor <jeletor@jeletor.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeletor/nostr-inbox.git"
+  },
+  "dependencies": {
+    "nostr-tools": "^2.12.0",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ]
+}
