@@ -116,6 +116,31 @@ export function poll(opts: PollOptions): Promise<PollResult>;
 export function buildFilters(pubkey: string, channels?: Channels, since?: number): object[];
 export function classifyEvent(event: NostrEvent, myPubkey: string): Classification;
 
+// Webhooks
+export interface WebhookOptions {
+  url: string;
+  secret?: string;
+  events?: NotificationType[];
+  urgentOnly?: boolean;
+  batchMs?: number;
+  maxBatchSize?: number;
+  timeoutMs?: number;
+  retries?: number;
+  onError?: (error: Error, payload: any) => void;
+  onSuccess?: (result: { status: number; body: string; payload: any }) => void;
+}
+
+export interface Webhook {
+  send(notification: Notification): Promise<void>;
+  handler(notification: Notification): void;
+  close(): Promise<void>;
+  attach(inbox: Inbox): Webhook;
+  detach(inbox: Inbox): Webhook;
+}
+
+export function createWebhook(opts: WebhookOptions): Webhook;
+export function verifySignature(payload: string, signature: string, secret: string): boolean;
+
 export const KINDS: {
   TEXT_NOTE: 1;
   DM_ENCRYPTED: 4;

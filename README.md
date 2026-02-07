@@ -110,6 +110,77 @@ const inbox = createInbox({
 });
 ```
 
+## Webhooks
+
+Push notifications to an HTTP endpoint instead of polling:
+
+```javascript
+const { createInbox, createWebhook } = require('nostr-inbox');
+
+const inbox = createInbox({ pubkey: '...' });
+
+// Create webhook — notifications will POST to this URL
+const webhook = createWebhook({
+  url: 'https://your-server.com/nostr-webhook',
+  secret: 'your-hmac-secret',  // Signs payloads
+  events: ['dm', 'dvm_request', 'marketplace_bid'],  // Filter types
+  urgentOnly: false,
+  batchMs: 5000,  // Batch notifications (0 = immediate)
+  retries: 2
+});
+
+// Attach to inbox
+webhook.attach(inbox);
+await inbox.start();
+```
+
+### Webhook Payload
+
+```json
+{
+  "event": "notification",
+  "timestamp": 1707300000000,
+  "notification": {
+    "id": "event-id",
+    "type": "dm",
+    "priority": "high",
+    "from": "sender-pubkey",
+    "content": "...",
+    "kind": 4,
+    "createdAt": 1707300000000
+  }
+}
+```
+
+Batched payload (when `batchMs > 0`):
+```json
+{
+  "event": "batch",
+  "timestamp": 1707300000000,
+  "count": 3,
+  "notifications": [...]
+}
+```
+
+### Verify Webhook Signatures
+
+```javascript
+const { verifySignature } = require('nostr-inbox');
+
+app.post('/nostr-webhook', (req, res) => {
+  const sig = req.headers['x-signature-256'];
+  const payload = JSON.stringify(req.body);
+  
+  if (!verifySignature(payload, sig, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Process notification
+  console.log(req.body.notification);
+  res.send('ok');
+});
+```
+
 ## API
 
 ### `createInbox(opts)` → `inbox`
